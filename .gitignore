@@ -1,0 +1,28 @@
+# General
+.DS_Store
+Thumbs.db
+*.zip
+
+# Java
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Node/Angular
+**/node_modules/
+**/dist/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Env
+.env
+.env.*
+.venv/
+.venv-*/
+.tmp/
+site/
+
+# Logs
+*.log

@@ -1,0 +1,39 @@
+site_name: YeriBank Docs
+site_description: Public technical and product documentation for YeriBank
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Product Overview: product-overview.md
+  - Architecture: architecture.md
+  - Backend Diagrams: backend-diagrams.md
+  - API Overview: api.md
+  - Messaging: messaging.md
+  - Development: development.md
+  - Cloud Deployment: deployment-cloud.md
+  - Roadmap: roadmap.md

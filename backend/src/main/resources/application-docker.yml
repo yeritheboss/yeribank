@@ -1,0 +1,3 @@
+app:
+  flyway:
+    auto-repair-on-validation-error: true

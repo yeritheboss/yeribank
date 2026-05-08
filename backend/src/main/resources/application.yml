@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: yeribank-core
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/yeribank}
+    username: ${SPRING_DATASOURCE_USERNAME:yeribank}
+    password: ${SPRING_DATASOURCE_PASSWORD:yeribank}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    admin:
+      auto-create: ${APP_KAFKA_ENABLED:true}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  flyway:
+    auto-repair-on-validation-error: ${APP_FLYWAY_AUTO_REPAIR_ON_VALIDATION_ERROR:false}
+  kafka:
+    enabled: ${APP_KAFKA_ENABLED:true}
+    transfer-topic: ${APP_KAFKA_TRANSFER_TOPIC:transfer-created}
+
+security:
+  jwt:
+    secret: ${SECURITY_JWT_SECRET:6fQfLw4K9mP2sV8xN1tR7yB3uD5cH0jA6kL2zQ9wX4eM1nT}
+    access-token-minutes: ${SECURITY_JWT_ACCESS_TOKEN_MINUTES:15}
+    refresh-token-days: ${SECURITY_JWT_REFRESH_TOKEN_DAYS:7}
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
