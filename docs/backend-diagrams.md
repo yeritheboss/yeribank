@@ -2,7 +2,57 @@
 
 This page explains the current YeriBank backend visually and shows the intended evolution path.
 
-## Current Backend Modules
+## Current Backend Map
+
+```mermaid
+flowchart TB
+  classDef edge fill:#e8f1ff,stroke:#2f6fed,stroke-width:1.5px,color:#0f172a
+  classDef app fill:#fff4e8,stroke:#dd6b20,stroke-width:1.5px,color:#0f172a
+  classDef infra fill:#edfdf4,stroke:#2f855a,stroke-width:1.5px,color:#0f172a
+  classDef support fill:#f5f0ff,stroke:#6b46c1,stroke-width:1.5px,color:#0f172a
+
+  client["API Clients<br/>Swagger UI / future frontend"]:::edge --> web["REST API Layer<br/>Controllers, DTOs, validation, security filters"]:::edge
+
+  subgraph application["Application Modules"]
+    direction LR
+    identity["Identity and Auth<br/>Users, roles, JWT, refresh tokens"]:::app
+    accounts["Accounts<br/>Account numbers, balances, ownership"]:::app
+    transfers["Transfers<br/>Execution, validations, transfer history"]:::app
+    dashboard["Dashboard<br/>User summary and recent movements"]:::support
+    risk["Risk and Fraud<br/>Risk profiles, assessments, fraud alerts"]:::support
+    loans["Loans<br/>Financial profiles and loan applications"]:::support
+    audit["Audit<br/>Persistent admin audit trail"]:::support
+  end
+
+  web --> identity
+  web --> accounts
+  web --> transfers
+  web --> dashboard
+  web --> risk
+  web --> loans
+  web --> audit
+
+  subgraph platform["Persistence and Platform Services"]
+    direction LR
+    postgres[("PostgreSQL")]:::infra
+    kafka["Kafka<br/>transfer-created"]:::infra
+    flyway["Flyway<br/>schema migrations"]:::infra
+    swagger["OpenAPI / Swagger UI"]:::infra
+  end
+
+  identity --> postgres
+  accounts --> postgres
+  transfers --> postgres
+  dashboard --> postgres
+  risk --> postgres
+  loans --> postgres
+  audit --> postgres
+  transfers --> kafka
+  postgres --> flyway
+  web --> swagger
+```
+
+## Current Hexagonal View
 
 ```mermaid
 flowchart LR
@@ -27,6 +77,53 @@ flowchart LR
   transfers --> kafka["Kafka<br/>transfer-created"]
   db --> flyway["Flyway migrations"]
   web --> swagger["OpenAPI / Swagger UI"]
+```
+
+## Target Microservice View
+
+```mermaid
+flowchart TB
+  classDef exp fill:#e8f1ff,stroke:#2f6fed,stroke-width:1.5px,color:#0f172a
+  classDef svc fill:#fff4e8,stroke:#dd6b20,stroke-width:1.5px,color:#0f172a
+  classDef data fill:#edfdf4,stroke:#2f855a,stroke-width:1.5px,color:#0f172a
+  classDef react fill:#f5f0ff,stroke:#6b46c1,stroke-width:1.5px,color:#0f172a
+
+  ui["Angular UI / External Clients"]:::exp --> gateway["API Gateway<br/>Routing, auth propagation, throttling"]:::exp
+
+  subgraph core["Core Banking Services"]
+    direction LR
+    identitySvc["Identity Service<br/>Users, roles, JWT"]:::svc
+    accountSvc["Account Service<br/>Accounts and balances"]:::svc
+    transferSvc["Transfer Service<br/>Transfer orchestration"]:::svc
+  end
+
+  subgraph eventing["Data and Event Backbone"]
+    direction LR
+    coreDb[("PostgreSQL")]:::data
+    eventBus["Kafka Event Bus"]:::data
+  end
+
+  subgraph downstream["Reactive Services"]
+    direction LR
+    fraudSvc["Fraud Service<br/>Rules and alerting"]:::react
+    scoringSvc["Scoring Service<br/>Behavioral scoring"]:::react
+    notificationSvc["Notification Service<br/>Email and push"]:::react
+    reportingSvc["Reporting Service<br/>Monthly insights"]:::react
+  end
+
+  gateway --> identitySvc
+  gateway --> accountSvc
+  gateway --> transferSvc
+
+  identitySvc --> coreDb
+  accountSvc --> coreDb
+  transferSvc --> coreDb
+  transferSvc --> eventBus
+
+  eventBus --> fraudSvc
+  eventBus --> scoringSvc
+  eventBus --> notificationSvc
+  eventBus --> reportingSvc
 ```
 
 ## Runtime Request Flow
@@ -164,4 +261,4 @@ flowchart LR
 
 ## Reading the Diagrams
 
-The first diagram is the current backend map. The second shows how one request moves through security, controllers, use cases, domain logic and adapters. The third focuses on persistence relationships. The fourth and fifth diagrams show how the API is consumed today and how the project can grow without losing the existing modular boundaries.
+The first diagram is the current backend map. The second shows the same platform from a more explicitly hexagonal perspective. The third presents the target microservice-oriented shape. The remaining diagrams explain runtime flow, data relationships, API surface and the evolution path without losing the current modular boundaries.

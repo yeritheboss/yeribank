@@ -27,12 +27,49 @@ Base inicial creada:
 
 ## Arquitectura objetivo
 
-```text
-Angular UI -> API Gateway -> (User, Account, Transfer Services)
-                                  |
-                             PostgreSQL + Kafka
-                                  |
-             Fraud Service | Scoring AI Service | Notification Service
+```mermaid
+flowchart TB
+  classDef experience fill:#e8f1ff,stroke:#2f6fed,stroke-width:1.5px,color:#0f172a
+  classDef core fill:#fff4e8,stroke:#dd6b20,stroke-width:1.5px,color:#0f172a
+  classDef infra fill:#edfdf4,stroke:#2f855a,stroke-width:1.5px,color:#0f172a
+  classDef reactive fill:#f5f0ff,stroke:#6b46c1,stroke-width:1.5px,color:#0f172a
+
+  ui["Angular UI<br/>Customer and Admin Frontend"]:::experience
+  gateway["API Gateway<br/>Routing, auth propagation, throttling"]:::experience
+
+  subgraph corePlatform["Core Banking Platform"]
+    direction LR
+    identity["Identity Service<br/>Users, roles, JWT, refresh tokens"]:::core
+    accounts["Account Service<br/>Accounts, balances, ownership"]:::core
+    transfers["Transfer Service<br/>Money movement, validations, events"]:::core
+  end
+
+  subgraph backbone["Data and Event Backbone"]
+    direction LR
+    postgres[("PostgreSQL")]:::infra
+    kafka["Kafka Event Bus<br/>transfer-created and future events"]:::infra
+  end
+
+  subgraph intelligence["Reactive and Intelligence Services"]
+    direction LR
+    fraud["Fraud Service<br/>Risk rules and alerting"]:::reactive
+    scoring["Scoring AI Service<br/>Behavioral scoring"]:::reactive
+    notification["Notification Service<br/>Email, push and event notifications"]:::reactive
+  end
+
+  ui --> gateway
+  gateway --> identity
+  gateway --> accounts
+  gateway --> transfers
+
+  identity --> postgres
+  accounts --> postgres
+  transfers --> postgres
+  transfers --> kafka
+
+  kafka --> fraud
+  kafka --> scoring
+  kafka --> notification
 ```
 
 En Fase 1 se implementa como monolito modular hexagonal. En Fase 2 se extraen microservicios.
